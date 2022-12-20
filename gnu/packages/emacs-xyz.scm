@@ -1283,6 +1283,38 @@ leveraging built-in functionality.")
     (license (list license:gpl3+
                    license:fdl1.3+)))) ; GFDLv1.3+ for the manual
 
+(define-public emacs-fzf
+  (let ((commit "21912ebc7e1084aa88c9d8b7715e782a3978ed23")
+        (revision "0"))
+    (package
+      (name "emacs-fzf")
+      (version (git-version "0.2" revision commit))
+      (source (origin
+                (method git-fetch)
+                (uri (git-reference
+                      (url "https://github.com/bling/fzf.el")
+                      (commit commit)))
+                (file-name (git-file-name name version))
+                (sha256
+                 (base32
+                  "0gdqjh8996hb06bnnyhi94k69mjfrzyfgq00a9s4wwagv28sqmkj"))))
+      (build-system emacs-build-system)
+      (arguments
+       (list
+        #:tests? #f                     ;no tests
+        #:phases
+        #~(modify-phases %standard-phases
+            (add-after 'unpack 'patch-fzf-executable
+              (lambda* (#:key inputs #:allow-other-keys)
+                (emacs-substitute-variables "fzf.el"
+                  ("fzf/executable" (search-input-file inputs "/bin/fzf"))))))))
+      (inputs (list fzf))
+      (home-page "https://github.com/bling/fzf.el")
+      (synopsis "Emacs front-end for Fzf finder")
+      (description "This package provides an Emacs front-end for Fzf general
+purpose finder.")
+      (license license:gpl3+))))
+
 (define-public emacs-minions
   (package
     (name "emacs-minions")
@@ -3581,7 +3613,7 @@ Its features are:
 (define-public emacs-citeproc-el
   (package
     (name "emacs-citeproc-el")
-    (version "0.9.1")
+    (version "0.9.2")
     (source
      (origin
        (method git-fetch)
@@ -3590,7 +3622,7 @@ Its features are:
              (commit version)))
        (file-name (git-file-name name version))
        (sha256
-        (base32 "0rkwqn9pcimfcyq19wlrcij0kcjyhbwisla7vwbhjj8ang0bq9rm"))))
+        (base32 "0p9gch5iijia5pm9rzlv50xcad2g9mis9mc90nvh31in9xjcccpz"))))
     (build-system emacs-build-system)
     (arguments
      `(#:emacs ,emacs))                 ;need libxml support
@@ -10196,7 +10228,7 @@ replaced with the directory you choose.")
 (define-public emacs-consult-notmuch
   (package
     (name "emacs-consult-notmuch")
-    (version "0.8")
+    (version "0.8.1")
     (source
      (origin
        (method git-fetch)
@@ -10205,7 +10237,7 @@ replaced with the directory you choose.")
              (commit version)))
        (file-name (git-file-name name version))
        (sha256
-        (base32 "18r47cj89qli534irah3lwwzsnik5bcf61clnrkhafqv9y51m67z"))))
+        (base32 "0gcd69i99prnskh1na7clydqgh1y9rbzkdc6dy9zmin9hfdrw1yd"))))
     (build-system emacs-build-system)
     (propagated-inputs
      (list emacs-consult emacs-notmuch))
@@ -14436,7 +14468,7 @@ programming and reproducible research.")
 (define-public emacs-org-contrib
   (package
     (name "emacs-org-contrib")
-    (version "0.4")
+    (version "0.4.1")
     (source
      (origin
        (method git-fetch)
@@ -14445,7 +14477,7 @@ programming and reproducible research.")
              (commit (string-append "release_" version))))
        (file-name (git-file-name name version))
        (sha256
-        (base32 "06b1rpywj596nnnap6pj6fnmcq8fcc4i30zv7qsvs3ryxciw01fb"))))
+        (base32 "0f3zjy3ybkqmvvlx04251add0vcz248qibxy5akal96l8bdhjajx"))))
     (build-system emacs-build-system)
     (arguments
      `(#:phases
@@ -16491,14 +16523,14 @@ the center of the screen and not at the bottom.")
 (define-public emacs-posframe
   (package
     (name "emacs-posframe")
-    (version "1.3.1")
+    (version "1.3.2")
     (source
      (origin
        (method url-fetch)
        (uri (string-append "https://elpa.gnu.org/packages/"
                            "posframe-" version ".tar"))
        (sha256
-        (base32 "0j5nchfpbrf9fsr82lnvhnq6vi33gv3glsbqn18knnby8m7sxzci"))))
+        (base32 "05qkwb3ys05chn0maz7q19kp539m7p5acb8di4rni4vjjlkpx2bj"))))
     (build-system emacs-build-system)
     ;; emacs-minimal does not include the function font-info.
     (arguments
@@ -20413,7 +20445,7 @@ according to a parsing expression grammar.")
 (define-public emacs-eldev
   (package
     (name "emacs-eldev")
-    (version "1.3")
+    (version "1.3.1")
     (source
      (origin
        (method git-fetch)
@@ -20422,7 +20454,7 @@ according to a parsing expression grammar.")
              (commit version)))
        (file-name (git-file-name name version))
        (sha256
-        (base32 "112jv9rz6brglffwsablnhafhhnfnq89k9vh8xzbbi6i4xz2l1ak"))))
+        (base32 "14rrh5ycwd3r5k3df8aif4jii645m5jgplxky3hrjgr8vxd951h8"))))
     (build-system emacs-build-system)
     (arguments
      (list
@@ -27087,7 +27119,7 @@ Debug server.")
 (define-public emacs-bfuture
   (package
     (name "emacs-bfuture")
-    (version "1.0.1")
+    (version "1.0.2")
     (source
      (origin
        (method git-fetch)
@@ -27096,7 +27128,7 @@ Debug server.")
              (commit (string-append "v" version))))
        (sha256
         (base32
-         "1m4v4xbsvg26z7nvg2c8q7x1nvv7v4ajm56l0nbkwcbdbrgahpva"))
+         "1qflkyr7fafw84mksxs25mka133y8ak8nsga3al29014pshbvzxn"))
        (file-name (git-file-name name version))))
     (build-system emacs-build-system)
     (arguments
@@ -34649,7 +34681,7 @@ across sessions.")
 (define-public emacs-vertico-posframe
   (package
     (name "emacs-vertico-posframe")
-    (version "0.5.9")
+    (version "0.6.0")
     (source (origin
               (method url-fetch)
               (uri (string-append
@@ -34657,7 +34689,7 @@ across sessions.")
                     ".tar"))
               (sha256
                (base32
-                "1d1b8lfhr8zxa0dwsiqb1wzawx90l6lrr26jl17gpj85iyj3imq6"))))
+                "1cwi26jz9dn8la6zxxai2pfkcpz8lwf4cd8hr44lak6x0ca9bwr3"))))
     (build-system emacs-build-system)
     (propagated-inputs (list emacs-posframe emacs-vertico))
     (home-page "https://github.com/tumashu/vertico-posframe")

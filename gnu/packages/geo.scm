@@ -293,7 +293,7 @@ OpenStreetMap written in C using eXpat, Cairo and GLib.")
 (define-public geos
   (package
     (name "geos")
-    (version "3.11.0")
+    (version "3.11.1")
     (source (origin
               (method url-fetch)
               (uri (string-append "http://download.osgeo.org/geos/geos-"
@@ -301,7 +301,7 @@ OpenStreetMap written in C using eXpat, Cairo and GLib.")
                                   ".tar.bz2"))
               (sha256
                (base32
-                "12l59pxawyizmc4wn20dvjn7aifqwkim4ysmc78h91mayjmqravr"))))
+                "1qhbirv1rbznv99ha0pa0zybvcsn0dsz2xfc65vr8bgrm77v63kd"))))
     (build-system cmake-build-system)
     (arguments `(#:phases
                  (modify-phases %standard-phases
@@ -409,6 +409,7 @@ and driving.")
        (method url-fetch)
        (uri (string-append "http://download.osgeo.org/geotiff/libgeotiff/libgeotiff-"
                            version ".tar.gz"))
+       (patches (search-patches "libgeotiff-fix-tests-with-proj-9.1.1.patch"))
        (sha256
         (base32 "1mjmgv48x51ppax5dnb6lq7z600czxll53bx6jbzqwd4m93i7aq5"))
        (modules '((guix build utils)))
@@ -599,7 +600,7 @@ fully fledged Spatial SQL capabilities.")
 (define-public proj
   (package
     (name "proj")
-    (version "9.1.0")
+    (version "9.1.1")
     (source
      (origin
        (method url-fetch)
@@ -607,7 +608,7 @@ fully fledged Spatial SQL capabilities.")
                            version ".tar.gz"))
        (sha256
         (base32
-         "0593vd9sac0c98j1f4rammd90d4xnhygbr6d49i8il6ajjdj7cl1"))))
+         "0fbd1vj4cj19kwh03vdn0a4hr0xaacvi876yyyw5xfsj1q0x8g00"))))
     (build-system cmake-build-system)
     (native-inputs (list googletest pkg-config))
     (propagated-inputs (list curl libtiff sqlite)) ;required by proj.pc
@@ -701,14 +702,14 @@ projections.")
 (define-public python-pyproj
   (package
     (name "python-pyproj")
-    (version "3.3.1")
+    (version "3.4.0")
     (source
       (origin
         (method url-fetch)
         (uri (pypi-uri "pyproj" version))
         (sha256
           (base32
-            "1gjg63irs44djyqbp9gg7s02d0y5i9cd1a83phyzp5fcj56y3n5k"))))
+            "0czbfl5dd7jckbwvinfwiwdb99sxj796gfn3a9zqbsdc4xcl8257"))))
     (build-system python-build-system)
     (arguments
      `(#:phases
@@ -1045,7 +1046,7 @@ development.")
 (define-public gdal
   (package
     (name "gdal")
-    (version "3.5.1")
+    (version "3.6.1")
     (source (origin
               (method url-fetch)
               (uri (string-append
@@ -1053,7 +1054,7 @@ development.")
                      version ".tar.gz"))
               (sha256
                (base32
-                "1l93q7xf6qx9ck5axfkf3ygmvclxkvrjd8x00ckn7j0d0750ci3w"))
+                "1qckwnygszxkkq40bf87s3m1sab6jj9jyakdvskh0qf7dq8zjarf"))
               (modules '((guix build utils)))
               (snippet
                 `(begin
@@ -1083,19 +1084,27 @@ development.")
            json-c
            libgeotiff
            libjpeg-turbo
+           libjxl
            libpng
            libtiff
            libwebp
+           lz4
            netcdf
            openssl
+           openjpeg
            pcre2
            postgresql ; libpq
            proj
            qhull
            sqlite
-           zlib))
+           swig
+           zlib
+           zstd))
     (native-inputs
-     (list pkg-config))
+     (list pkg-config
+           python))
+    (propagated-inputs
+     (list python-numpy))
     (home-page "https://gdal.org/")
     (synopsis "Raster and vector geospatial data format library")
     (description "GDAL is a translator library for raster and vector geospatial
@@ -1123,25 +1132,6 @@ utilities for data translation and processing.")
                (license:non-copyleft "file://alg/internal_libqhull/COPYING.txt")
                ;; frmts/mrf/libLERC
                license:asl2.0))))
-
-(define-public python-gdal
-  (package (inherit gdal)
-    (name "python-gdal")
-    (build-system python-build-system)
-    (arguments
-     '(#:tests? #f                      ; no tests
-       #:phases
-       (modify-phases %standard-phases
-         (add-before 'build 'chdir
-           (lambda _
-             (chdir "swig/python")
-             #t)))))
-    (native-inputs '())
-    (propagated-inputs
-     (list python-numpy))
-    (inputs
-     (list gdal))
-    (synopsis "GDAL (Geospatial Data Abstraction Library) python bindings")))
 
 (define-public python-pyshp
   (package
@@ -1177,13 +1167,13 @@ utilities for data translation and processing.")
   (package
     (name "python-cartopy")
     ;; This is a post-release fix that adds build_ext to setup.py.
-    (version "0.20.3")
+    (version "0.21.0")
     (source
      (origin
        (method url-fetch)
        (uri (pypi-uri "Cartopy" version))
        (sha256
-        (base32 "01lhnkhw22jp6hnrs5qvgkq4fqcni2sx7ydiyv8w8xxx5wpglq0d"))))
+        (base32 "0hnfs75dcnz12ximah5xn9566r8zz189lxikmj4lrs9jl4l3l7ff"))))
     (build-system python-build-system)
     (arguments
      `(#:phases
@@ -1206,13 +1196,12 @@ utilities for data translation and processing.")
            python-scipy
            python-shapely))
     (inputs
-     (list geos
-           ;; cartopy's setup.py looks for the proj executable.
-           ;; Not sure if it actually makes use of it since it
-           ;; probably uses proj only through pyproj.
-           proj))
+     (list geos))
     (native-inputs
-     (list python-cython python-flufl-lock python-pytest))
+     (list python-cython
+           python-flufl-lock
+           python-pytest
+           python-pytest-mpl))
     (home-page "https://scitools.org.uk/cartopy/docs/latest/")
     (synopsis "Cartographic library for visualisation")
     (description
@@ -2551,6 +2540,7 @@ growing set of geoscientific methods.")
                              "ProcessingQgisAlgorithmsTestPt2"
                              "ProcessingQgisAlgorithmsTestPt3"
                              "ProcessingQgisAlgorithmsTestPt4"
+                             "ProcessingGdalAlgorithmsRasterTest"
                              "ProcessingGdalAlgorithmsVectorTest"
                              "ProcessingGrass7AlgorithmsImageryTest"
                              "ProcessingGrass7AlgorithmsRasterTestPt1"
@@ -2668,7 +2658,6 @@ growing set of geoscientific methods.")
            python-chardet
            python-dateutil
            python-future
-           python-gdal
            python-jinja2
            python-numpy
            python-owslib
