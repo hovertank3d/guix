@@ -166,7 +166,7 @@
   ;; start precisely like this.
   (let ((version "1.4.0")
         (commit "1800971a8d9c6ebbed094f74d4fded5e0c91dbe7")
-        (revision 0.1))
+        (revision 0))
     (package
       (name "guix")
 
