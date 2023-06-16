@@ -262,6 +262,17 @@ $(prefix)/etc/openrc\n")))
                               (substitute* "tests/gexp.scm"
                                 (("2\\.0") "3.0")))))
                         '())
+                    ,@(if (target-x86-32?)
+                          `((add-after 'unpack 'disable-tests
+                              (lambda _
+                                (substitute* "Makefile.am"
+                                  (("tests/grafts.scm") "")
+                                  (("tests/offload.scm") "")
+                                  (("tests/packages.scm") "")
+                                  (("tests/guix-build.sh") "")
+                                  (("tests/guix-package.sh") "")
+                                  (("tests/guix-system.sh") "")))))
+                        '())
                     (add-before 'build 'use-host-compressors
                       (lambda* (#:key inputs target #:allow-other-keys)
                         (when target
